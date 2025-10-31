@@ -1,0 +1,35 @@
+{
+  "name": "nebula-vm",
+  "version": "1.0.0",
+  "description": "javascript code obfuscator based on virtualization",
+  "keywords": [
+    "javascript-obfuscator",
+    "obfuscator",
+    "protector",
+    "virtualization",
+    "security",
+    "obfuscation",
+    "software",
+    "virtual-machine",
+    "jsvm",
+    "vm"
+  ],
+  "license": "MIT",
+  "author": "x676w",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev:watch": "nodemon",
+    "dev:start": "tsc && node dev/obfuscate.js",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@babel/parser": "^7.28.5",
+    "@babel/types": "^7.28.5",
+    "@types/node": "^24.9.1",
+    "nodemon": "^3.1.10",
+    "typescript": "^5.9.3",
+    "uglify-js": "^3.19.3"
+  }
+}
