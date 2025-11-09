@@ -79,6 +79,8 @@ export default class BinaryExpressionCompiler extends NodeCompiler<BinaryExpress
     this.compiler.bytecode.linkRegister(rightRegister);
     this.compiler.bytecode.linkRegister(leftRegister);
 
+    this.compiler.registerAllocator.disposeRegister(rightRegister);
+
     return resultRegister;
   };
 };

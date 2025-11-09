@@ -56,8 +56,10 @@ export default class Bytecode {
       output.push((string.length >> 24) & 0xFF);
     
       for(const char of string.split('')) {
-        output.push(char.charCodeAt(0) & 0xFF);
-        output.push((char.charCodeAt(0) >> 8) & 0xFF);
+        const xorCharCode = char.charCodeAt(0) ^ 0x80;
+
+        output.push(xorCharCode & 0xFF);
+        output.push((xorCharCode >> 8) & 0xFF);
       };
     };
 

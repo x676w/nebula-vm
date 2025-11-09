@@ -34,4 +34,7 @@ export enum OperationCode {
   UNARY_NOT,
   UNARY_BIT_NOT,
   UNARY_TYPEOF,
+
+  LOAD_VARIABLE,
+  STORE_VARIABLE,
 };

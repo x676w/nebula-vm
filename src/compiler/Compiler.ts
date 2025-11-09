@@ -1,6 +1,7 @@
-import type { Node, Program } from "@babel/types";
+import { type Node, type Program } from "@babel/types";
 import parseCode from "../utils/Parse.js";
 import Bytecode from "./bytecode/Bytecode.js";
+import ScopeManager from "./ScopeManager.js";
 import RegisterAllocator from "./register/RegisterAllocator.js";
 
 /**
@@ -13,14 +14,16 @@ import NullLiteralCompiler from "./compilers/literals/NullLiteralCompiler.js";
 import BinaryExpressionCompiler from "./compilers/expressions/BinaryExpressionCompiler.js";
 import LogicalExpressionCompiler from "./compilers/expressions/LogicalExpressionCompiler.js";
 import UnaryExpressionCompiler from "./compilers/expressions/UnaryExpressionCompiler.js";
+import VariableDeclarationCompiler from "./compilers/others/VariableDeclarationCompiler.js";
+import VariableDeclaratorCompiler from "./compilers/others/VariableDeclaratorCompiler.js";
 import ExpressionStatementCompiler from "./compilers/statements/ExpressionStatementCompiler.js";
 import IdentifierCompiler from "./compilers/others/IdentifierCompiler.js";
+import BlockStatementCompiler from "./compilers/statements/BlockStatementCompiler.js";
 
 /**
  * Main compiler
  */
 export default class Compiler {
-  private astTree: Program;
   private stringLiteralCompiler: StringLiteralCompiler;
   private numericLiteralCompiler: NumericLiteralCompiler;
   private booleanLiteralCompiler: BooleanLiteralCompiler;
@@ -28,16 +31,20 @@ export default class Compiler {
   private binaryExpressionCompiler: BinaryExpressionCompiler;
   private logicalExpressionCompiler: LogicalExpressionCompiler;
   private unaryExpressionCompiler: UnaryExpressionCompiler;
+  private variableDeclarationCompiler: VariableDeclarationCompiler;
+  private variableDeclaratorCompiler: VariableDeclaratorCompiler;
   private expressionStatementCompiler: ExpressionStatementCompiler;
   private identifierCompiler: IdentifierCompiler;
+  private blockStatementCompiler: BlockStatementCompiler;
 
   public bytecode: Bytecode;
+  public scopeManager: ScopeManager;
   public registerAllocator: RegisterAllocator;
+  public astTree: Program;
   public sourceCode: string;
   public verbose: boolean;
 
   constructor(sourceCode: string, verbose?: boolean) {
-    this.astTree = parseCode(sourceCode);
     this.stringLiteralCompiler = new StringLiteralCompiler(this);
     this.numericLiteralCompiler = new NumericLiteralCompiler(this);
     this.booleanLiteralCompiler = new BooleanLiteralCompiler(this);
@@ -45,11 +52,16 @@ export default class Compiler {
     this.binaryExpressionCompiler = new BinaryExpressionCompiler(this);
     this.logicalExpressionCompiler = new LogicalExpressionCompiler(this);
     this.unaryExpressionCompiler = new UnaryExpressionCompiler(this);
+    this.variableDeclarationCompiler = new VariableDeclarationCompiler(this);
+    this.variableDeclaratorCompiler = new VariableDeclaratorCompiler(this);
     this.expressionStatementCompiler = new ExpressionStatementCompiler(this);
     this.identifierCompiler = new IdentifierCompiler(this);
+    this.blockStatementCompiler = new BlockStatementCompiler(this);
 
     this.bytecode = new Bytecode();
+    this.scopeManager = new ScopeManager();
     this.registerAllocator = new RegisterAllocator();
+    this.astTree = parseCode(sourceCode);
     this.sourceCode = sourceCode;
     this.verbose = verbose ?? false;
   };
@@ -61,7 +73,7 @@ export default class Compiler {
   };
 
   public compileNode(node: Node) {
-    this.debug("trying to compile " + node.type);
+    this.debug("compiling " + node.type + " node");
     
     switch(node.type) {
       case "StringLiteral": return this.stringLiteralCompiler.compile(node);
@@ -71,10 +83,11 @@ export default class Compiler {
       case "BinaryExpression": return this.binaryExpressionCompiler.compile(node);
       case "LogicalExpression": return this.logicalExpressionCompiler.compile(node);
       case "UnaryExpression": return this.unaryExpressionCompiler.compile(node);
-      
+      case "VariableDeclaration": return this.variableDeclarationCompiler.compile(node);
+      case "VariableDeclarator": return this.variableDeclaratorCompiler.compile(node);
       case "ExpressionStatement": return this.expressionStatementCompiler.compile(node);
-    
       case "Identifier": return this.identifierCompiler.compile(node);
+      case "BlockStatement": return this.blockStatementCompiler.compile(node);
     };
   };
 
