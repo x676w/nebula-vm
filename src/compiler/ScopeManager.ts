@@ -46,13 +46,27 @@ export default class ScopeManager {
     return definition;
   };
 
-  // @ts-ignore
-  public hasVariable(name: string, scope: Scope = this.currentScope) {
+  public hasVariable(name: string, scope: Scope = this.currentScope): boolean {
+    if(scope.variables.has(name)) {
+      return true;
+    };
 
+    if(scope.parent) {
+      return this.hasVariable(name, scope.parent);
+    };
+
+    return false;
   };
 
-  // @ts-ignore
-  public getVariable(name: string, scope: Scope = this.currentScope) {
+  public getVariable(name: string, scope: Scope = this.currentScope): Definition {
+    if(scope.variables.has(name)) {
+      return scope.variables.get(name)!;
+    };
 
+    if(scope.parent) {
+      return this.getVariable(name, scope.parent);
+    };
+
+    throw new Error(name + " is not defined");
   };
 };

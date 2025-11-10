@@ -1,6 +1,5 @@
 import type { BinaryExpression } from "@babel/types";
 import type Compiler from "../../Compiler.js";
-import type Register from "../../register/Register.js";
 import NodeCompiler from "../NodeCompiler.js";
 import { OperationCode } from "../../bytecode/OperationCode.js";
 
@@ -9,9 +8,9 @@ export default class BinaryExpressionCompiler extends NodeCompiler<BinaryExpress
     super(compiler);
   };
   
-  public override compile(node: BinaryExpression): Register | void {
-    const leftRegister = this.compiler.compileNode(node.left)!;
-    const rightRegister = this.compiler.compileNode(node.right)!;
+  public override compile(node: BinaryExpression): void {
+    this.compiler.compileNode(node.right)!;
+    this.compiler.compileNode(node.left)!;
 
     switch(node.operator) {
       case "+":
@@ -72,15 +71,5 @@ export default class BinaryExpressionCompiler extends NodeCompiler<BinaryExpress
         this.compiler.bytecode.writeOperationCode(OperationCode.BINARY_BIT_OR);
         break;
     };
-
-    const resultRegister = leftRegister;
-
-    this.compiler.bytecode.linkRegister(resultRegister);
-    this.compiler.bytecode.linkRegister(rightRegister);
-    this.compiler.bytecode.linkRegister(leftRegister);
-
-    this.compiler.registerAllocator.disposeRegister(rightRegister);
-
-    return resultRegister;
   };
 };

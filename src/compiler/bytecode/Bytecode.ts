@@ -1,4 +1,3 @@
-import type Register from "../register/Register.js";
 import type { OperationCode } from "./OperationCode.js";
 
 export default class Bytecode {
@@ -42,10 +41,6 @@ export default class Bytecode {
     this.writeInstruction(dword >> 24);
   };
   
-  public linkRegister(register: Register) {
-    this.writeUShort(register.destination);
-  };
-
   public getStringsBytes() {
     const output = [];
 

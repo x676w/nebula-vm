@@ -1,8 +1,7 @@
-import { type Node, type Program } from "@babel/types";
+import { stringLiteral, type Node, type Program } from "@babel/types";
 import parseCode from "../utils/Parse.js";
 import Bytecode from "./bytecode/Bytecode.js";
 import ScopeManager from "./ScopeManager.js";
-import RegisterAllocator from "./register/RegisterAllocator.js";
 
 /**
  * Ast node compilers import
@@ -14,6 +13,9 @@ import NullLiteralCompiler from "./compilers/literals/NullLiteralCompiler.js";
 import BinaryExpressionCompiler from "./compilers/expressions/BinaryExpressionCompiler.js";
 import LogicalExpressionCompiler from "./compilers/expressions/LogicalExpressionCompiler.js";
 import UnaryExpressionCompiler from "./compilers/expressions/UnaryExpressionCompiler.js";
+import MemberExpressionCompiler from "./compilers/expressions/MemberExpressionCompiler.js";
+import CallExpressionCompiler from "./compilers/expressions/CallExpressionCompiler.js";
+import ArrayExpressionCompiler from "./compilers/expressions/ArrayExpressionCompiler.js";
 import VariableDeclarationCompiler from "./compilers/others/VariableDeclarationCompiler.js";
 import VariableDeclaratorCompiler from "./compilers/others/VariableDeclaratorCompiler.js";
 import ExpressionStatementCompiler from "./compilers/statements/ExpressionStatementCompiler.js";
@@ -31,6 +33,9 @@ export default class Compiler {
   private binaryExpressionCompiler: BinaryExpressionCompiler;
   private logicalExpressionCompiler: LogicalExpressionCompiler;
   private unaryExpressionCompiler: UnaryExpressionCompiler;
+  private memberExpressionCompiler: MemberExpressionCompiler;
+  private callExpressionCompiler: CallExpressionCompiler;
+  private arrayExpressionCompiler: ArrayExpressionCompiler;
   private variableDeclarationCompiler: VariableDeclarationCompiler;
   private variableDeclaratorCompiler: VariableDeclaratorCompiler;
   private expressionStatementCompiler: ExpressionStatementCompiler;
@@ -39,7 +44,6 @@ export default class Compiler {
 
   public bytecode: Bytecode;
   public scopeManager: ScopeManager;
-  public registerAllocator: RegisterAllocator;
   public astTree: Program;
   public sourceCode: string;
   public verbose: boolean;
@@ -52,6 +56,9 @@ export default class Compiler {
     this.binaryExpressionCompiler = new BinaryExpressionCompiler(this);
     this.logicalExpressionCompiler = new LogicalExpressionCompiler(this);
     this.unaryExpressionCompiler = new UnaryExpressionCompiler(this);
+    this.memberExpressionCompiler = new MemberExpressionCompiler(this);
+    this.callExpressionCompiler = new CallExpressionCompiler(this);
+    this.arrayExpressionCompiler = new ArrayExpressionCompiler(this);
     this.variableDeclarationCompiler = new VariableDeclarationCompiler(this);
     this.variableDeclaratorCompiler = new VariableDeclaratorCompiler(this);
     this.expressionStatementCompiler = new ExpressionStatementCompiler(this);
@@ -60,7 +67,6 @@ export default class Compiler {
 
     this.bytecode = new Bytecode();
     this.scopeManager = new ScopeManager();
-    this.registerAllocator = new RegisterAllocator();
     this.astTree = parseCode(sourceCode);
     this.sourceCode = sourceCode;
     this.verbose = verbose ?? false;
@@ -76,19 +82,26 @@ export default class Compiler {
     this.debug("compiling " + node.type + " node");
     
     switch(node.type) {
-      case "StringLiteral": return this.stringLiteralCompiler.compile(node);
-      case "NumericLiteral": return this.numericLiteralCompiler.compile(node);
-      case "BooleanLiteral": return this.booleanLiteralCompiler.compile(node);
-      case "NullLiteral": return this.nullLiteralCompiler.compile();
-      case "BinaryExpression": return this.binaryExpressionCompiler.compile(node);
-      case "LogicalExpression": return this.logicalExpressionCompiler.compile(node);
-      case "UnaryExpression": return this.unaryExpressionCompiler.compile(node);
-      case "VariableDeclaration": return this.variableDeclarationCompiler.compile(node);
-      case "VariableDeclarator": return this.variableDeclaratorCompiler.compile(node);
-      case "ExpressionStatement": return this.expressionStatementCompiler.compile(node);
-      case "Identifier": return this.identifierCompiler.compile(node);
-      case "BlockStatement": return this.blockStatementCompiler.compile(node);
+      case "StringLiteral": this.stringLiteralCompiler.compile(node); break;
+      case "NumericLiteral": this.numericLiteralCompiler.compile(node); break;
+      case "BooleanLiteral": this.booleanLiteralCompiler.compile(node); break;
+      case "NullLiteral": this.nullLiteralCompiler.compile(); break;
+      case "BinaryExpression": this.binaryExpressionCompiler.compile(node); break;
+      case "LogicalExpression": this.logicalExpressionCompiler.compile(node); break;
+      case "UnaryExpression": this.unaryExpressionCompiler.compile(node); break;
+      case "MemberExpression": this.memberExpressionCompiler.compile(node); break;
+      case "CallExpression": this.callExpressionCompiler.compile(node); break;
+      case "ArrayExpression": this.arrayExpressionCompiler.compile(node); break;
+      case "VariableDeclaration": this.variableDeclarationCompiler.compile(node); break;
+      case "VariableDeclarator": this.variableDeclaratorCompiler.compile(node); break;
+      case "ExpressionStatement": this.expressionStatementCompiler.compile(node); break;
+      case "Identifier": this.identifierCompiler.compile(node); break;
+      case "BlockStatement": this.blockStatementCompiler.compile(node); break;
     };
+  };
+
+  public compileAsStringLiteral(value: string) {
+    this.stringLiteralCompiler.compile(stringLiteral(value));
   };
 
   public compile() {

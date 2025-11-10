@@ -1,6 +1,5 @@
 import type { BlockStatement } from "@babel/types";
 import NodeCompiler from "../NodeCompiler.js";
-import type Register from "../../register/Register.js";
 import type Compiler from "../../Compiler.js";
 
 export default class BlockStatementCompiler extends NodeCompiler<BlockStatement> {
@@ -8,7 +7,7 @@ export default class BlockStatementCompiler extends NodeCompiler<BlockStatement>
     super(compiler);
   };
   
-  public override compile(node: BlockStatement): Register | void {
+  public override compile(node: BlockStatement): void {
     this.compiler.scopeManager.enterNewScope();
     
     for(const statement of node.body) {
