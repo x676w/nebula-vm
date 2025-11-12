@@ -20,7 +20,9 @@ import VariableDeclarationCompiler from "./compilers/others/VariableDeclarationC
 import VariableDeclaratorCompiler from "./compilers/others/VariableDeclaratorCompiler.js";
 import ExpressionStatementCompiler from "./compilers/statements/ExpressionStatementCompiler.js";
 import IdentifierCompiler from "./compilers/others/IdentifierCompiler.js";
+import IfStatementCompiler from "./compilers/statements/IfStatementCompiler.js";
 import BlockStatementCompiler from "./compilers/statements/BlockStatementCompiler.js";
+import DebuggerStatementCompiler from "./compilers/statements/DebuggerStatementCompiler.js";
 
 /**
  * Main compiler
@@ -40,7 +42,9 @@ export default class Compiler {
   private variableDeclaratorCompiler: VariableDeclaratorCompiler;
   private expressionStatementCompiler: ExpressionStatementCompiler;
   private identifierCompiler: IdentifierCompiler;
+  private ifStatementCompiler: IfStatementCompiler;
   private blockStatementCompiler: BlockStatementCompiler;
+  private debuggerStatementCompiler: DebuggerStatementCompiler;
 
   public bytecode: Bytecode;
   public scopeManager: ScopeManager;
@@ -63,7 +67,9 @@ export default class Compiler {
     this.variableDeclaratorCompiler = new VariableDeclaratorCompiler(this);
     this.expressionStatementCompiler = new ExpressionStatementCompiler(this);
     this.identifierCompiler = new IdentifierCompiler(this);
+    this.ifStatementCompiler = new IfStatementCompiler(this);
     this.blockStatementCompiler = new BlockStatementCompiler(this);
+    this.debuggerStatementCompiler = new DebuggerStatementCompiler(this);
 
     this.bytecode = new Bytecode();
     this.scopeManager = new ScopeManager();
@@ -96,7 +102,9 @@ export default class Compiler {
       case "VariableDeclarator": this.variableDeclaratorCompiler.compile(node); break;
       case "ExpressionStatement": this.expressionStatementCompiler.compile(node); break;
       case "Identifier": this.identifierCompiler.compile(node); break;
+      case "IfStatement": this.ifStatementCompiler.compile(node); break;
       case "BlockStatement": this.blockStatementCompiler.compile(node); break;
+      case "DebuggerStatement": this.debuggerStatementCompiler.compile(); break;
     };
   };
 
@@ -104,10 +112,12 @@ export default class Compiler {
     this.stringLiteralCompiler.compile(stringLiteral(value));
   };
 
-  public compile() {
+  public compile(compress?: boolean) {
     let elapsedTime = performance.now();
     this.debug("starting compilation, source code size: " + this.sourceCode.length);
     
+    this.bytecode.writeInstruction(compress ? 1 : 0);
+
     for(const node of this.astTree.body) {
       this.compileNode(node);
     };

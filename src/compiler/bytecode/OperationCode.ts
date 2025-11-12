@@ -46,4 +46,10 @@ export enum OperationCode {
 
   BUILD_ARRAY,
   BUILD_OBJECT,
+
+  JUMP,
+  JUMP_IF_TRUE,
+  JUMP_IF_FALSE,
+
+  DEBUGGER,
 };

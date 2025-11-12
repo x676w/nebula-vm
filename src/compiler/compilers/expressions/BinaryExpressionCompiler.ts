@@ -9,8 +9,8 @@ export default class BinaryExpressionCompiler extends NodeCompiler<BinaryExpress
   };
   
   public override compile(node: BinaryExpression): void {
-    this.compiler.compileNode(node.right)!;
-    this.compiler.compileNode(node.left)!;
+    this.compiler.compileNode(node.right);
+    this.compiler.compileNode(node.left);
 
     switch(node.operator) {
       case "+":
