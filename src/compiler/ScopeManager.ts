@@ -10,12 +10,14 @@ export interface Scope {
 };
 
 export default class ScopeManager {
-  private globalScope: Scope;
   private currentScope: Scope;
   
   constructor() {
-    this.globalScope = { id: 0, parent: null, variables: new Map() };
-    this.currentScope = this.globalScope;
+    this.currentScope = {
+      id: 0,
+      parent: null,
+      variables: new Map()
+    };
   };
 
   public getCurrentScope() {
@@ -38,6 +40,9 @@ export default class ScopeManager {
   };
   
   public defineVariable(name: string, scope: Scope = this.currentScope) {
+    if(scope.variables.has(name)) {
+      throw new Error("Variable " + name + " is already defined.");
+    };
     const definition: Definition = {
       scope: scope,
       destination: scope.variables.size

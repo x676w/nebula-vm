@@ -19,11 +19,10 @@ export default class VariableDeclaratorCompiler extends NodeCompiler<VariableDec
       this.compiler.bytecode.writeOperationCode(OperationCode.STACK_PUSH_UNDEFINED);
     };
     
-    const currentScope = this.compiler.scopeManager.getCurrentScope();
-    const definition = this.compiler.scopeManager.defineVariable(variableName, currentScope);
+    const definition = this.compiler.scopeManager.defineVariable(variableName);
 
     this.compiler.bytecode.writeOperationCode(OperationCode.STORE_VARIABLE);
-    this.compiler.bytecode.writeDword(currentScope.id);
+    this.compiler.bytecode.writeDword(definition.scope.id);
     this.compiler.bytecode.writeDword(definition.destination);  
   };
 };

@@ -40,6 +40,13 @@ export default class Bytecode {
     this.writeInstruction(dword >> 16);
     this.writeInstruction(dword >> 24);
   };
+
+  public writeDwordAt(pos: number, value: number) {
+    this.program[pos] = value & 0xFF;
+    this.program[pos + 1] = (value >> 8) & 0xFF;
+    this.program[pos + 2] = (value >> 16) & 0xFF;
+    this.program[pos + 3] = (value >> 24) & 0xFF;
+  };
   
   public getStringsBytes() {
     const output = [];
@@ -59,6 +66,18 @@ export default class Bytecode {
     };
 
     return output;
+  };
+
+  public flushProgram() {
+    const oldProgram = this.program;
+    this.program = [];
+    return oldProgram;
+  };
+
+  public replaceProgram(newProgram: number[]) {
+    const oldProgram = this.program;
+    this.program = newProgram;
+    return oldProgram;
   };
 
   public getBase64() {

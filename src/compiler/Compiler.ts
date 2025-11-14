@@ -14,8 +14,12 @@ import BinaryExpressionCompiler from "./compilers/expressions/BinaryExpressionCo
 import LogicalExpressionCompiler from "./compilers/expressions/LogicalExpressionCompiler.js";
 import UnaryExpressionCompiler from "./compilers/expressions/UnaryExpressionCompiler.js";
 import MemberExpressionCompiler from "./compilers/expressions/MemberExpressionCompiler.js";
+import NewExpressionCompiler from "./compilers/expressions/NewExpressionCompiler.js";
 import CallExpressionCompiler from "./compilers/expressions/CallExpressionCompiler.js";
 import ArrayExpressionCompiler from "./compilers/expressions/ArrayExpressionCompiler.js";
+import ObjectExpressionCompiler from "./compilers/expressions/ObjectExpressionCompiler.js";
+import AssignmentExpressionCompiler from "./compilers/expressions/AssignmentExpressionCompiler.js";
+import FunctionExpressionCompiler from "./compilers/expressions/FunctionExpressionCompiler.js";
 import VariableDeclarationCompiler from "./compilers/others/VariableDeclarationCompiler.js";
 import VariableDeclaratorCompiler from "./compilers/others/VariableDeclaratorCompiler.js";
 import ExpressionStatementCompiler from "./compilers/statements/ExpressionStatementCompiler.js";
@@ -23,6 +27,7 @@ import IdentifierCompiler from "./compilers/others/IdentifierCompiler.js";
 import IfStatementCompiler from "./compilers/statements/IfStatementCompiler.js";
 import BlockStatementCompiler from "./compilers/statements/BlockStatementCompiler.js";
 import DebuggerStatementCompiler from "./compilers/statements/DebuggerStatementCompiler.js";
+import ReturnStatementCompiler from "./compilers/statements/ReturnStatementCompiler.js";
 
 /**
  * Main compiler
@@ -36,13 +41,18 @@ export default class Compiler {
   private logicalExpressionCompiler: LogicalExpressionCompiler;
   private unaryExpressionCompiler: UnaryExpressionCompiler;
   private memberExpressionCompiler: MemberExpressionCompiler;
+  private newExpressionCompiler: NewExpressionCompiler;
   private callExpressionCompiler: CallExpressionCompiler;
   private arrayExpressionCompiler: ArrayExpressionCompiler;
+  private objectExpressionCompiler: ObjectExpressionCompiler;
+  private assignmentExpressionCompiler: AssignmentExpressionCompiler;
+  private functionExpressionCompiler: FunctionExpressionCompiler;
   private variableDeclarationCompiler: VariableDeclarationCompiler;
   private variableDeclaratorCompiler: VariableDeclaratorCompiler;
   private expressionStatementCompiler: ExpressionStatementCompiler;
   private identifierCompiler: IdentifierCompiler;
   private ifStatementCompiler: IfStatementCompiler;
+  private returnStatement: ReturnStatementCompiler;
   private blockStatementCompiler: BlockStatementCompiler;
   private debuggerStatementCompiler: DebuggerStatementCompiler;
 
@@ -61,13 +71,18 @@ export default class Compiler {
     this.logicalExpressionCompiler = new LogicalExpressionCompiler(this);
     this.unaryExpressionCompiler = new UnaryExpressionCompiler(this);
     this.memberExpressionCompiler = new MemberExpressionCompiler(this);
+    this.newExpressionCompiler = new NewExpressionCompiler(this);
     this.callExpressionCompiler = new CallExpressionCompiler(this);
     this.arrayExpressionCompiler = new ArrayExpressionCompiler(this);
+    this.objectExpressionCompiler = new ObjectExpressionCompiler(this);
+    this.assignmentExpressionCompiler = new AssignmentExpressionCompiler(this);
+    this.functionExpressionCompiler = new FunctionExpressionCompiler(this);
     this.variableDeclarationCompiler = new VariableDeclarationCompiler(this);
     this.variableDeclaratorCompiler = new VariableDeclaratorCompiler(this);
     this.expressionStatementCompiler = new ExpressionStatementCompiler(this);
     this.identifierCompiler = new IdentifierCompiler(this);
     this.ifStatementCompiler = new IfStatementCompiler(this);
+    this.returnStatement = new ReturnStatementCompiler(this);
     this.blockStatementCompiler = new BlockStatementCompiler(this);
     this.debuggerStatementCompiler = new DebuggerStatementCompiler(this);
 
@@ -96,13 +111,18 @@ export default class Compiler {
       case "LogicalExpression": this.logicalExpressionCompiler.compile(node); break;
       case "UnaryExpression": this.unaryExpressionCompiler.compile(node); break;
       case "MemberExpression": this.memberExpressionCompiler.compile(node); break;
+      case "NewExpression": this.newExpressionCompiler.compile(node); break;
       case "CallExpression": this.callExpressionCompiler.compile(node); break;
       case "ArrayExpression": this.arrayExpressionCompiler.compile(node); break;
+      case "ObjectExpression": this.objectExpressionCompiler.compile(node); break;
+      case "AssignmentExpression": this.assignmentExpressionCompiler.compile(node); break;
+      case "FunctionExpression": this.functionExpressionCompiler.compile(node); break;
       case "VariableDeclaration": this.variableDeclarationCompiler.compile(node); break;
       case "VariableDeclarator": this.variableDeclaratorCompiler.compile(node); break;
       case "ExpressionStatement": this.expressionStatementCompiler.compile(node); break;
       case "Identifier": this.identifierCompiler.compile(node); break;
       case "IfStatement": this.ifStatementCompiler.compile(node); break;
+      case "ReturnStatement": this.returnStatement.compile(node); break;
       case "BlockStatement": this.blockStatementCompiler.compile(node); break;
       case "DebuggerStatement": this.debuggerStatementCompiler.compile(); break;
     };
