@@ -11,7 +11,11 @@ export default class FunctionExpressionCompiler extends NodeCompiler<FunctionExp
   public override compile(node: FunctionExpression): void {
     const oldProgram = this.compiler.bytecode.flushProgram();
 
-    this.compiler.compileNode(node.body);
+    this.compiler.scopeManager.enterNewScope();
+
+    for(const statement of node.body.body) {
+      this.compiler.compileNode(statement);
+    };
 
     const fnProgram = this.compiler.bytecode.replaceProgram(oldProgram);
 
@@ -22,5 +26,7 @@ export default class FunctionExpressionCompiler extends NodeCompiler<FunctionExp
       const fnInstruction = fnProgram[i]!;
       this.compiler.bytecode.writeInstruction(fnInstruction);
     };
+
+    this.compiler.scopeManager.exitScope();
   };
 };

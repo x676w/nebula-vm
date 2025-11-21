@@ -11,7 +11,7 @@ export default class MemberExpressionCompiler extends NodeCompiler<MemberExpress
   public override compile(node: MemberExpression): void {
     this.compiler.compileNode(node.object);
 
-    if(node.property.type === "Identifier") {
+    if(node.property.type === "Identifier" && !node.computed) {
       this.compiler.compileAsStringLiteral(node.property.name);
     } else {
       this.compiler.compileNode(node.property);

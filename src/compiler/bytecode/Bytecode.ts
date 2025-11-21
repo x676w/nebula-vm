@@ -47,7 +47,7 @@ export default class Bytecode {
     this.program[pos + 2] = (value >> 16) & 0xFF;
     this.program[pos + 3] = (value >> 24) & 0xFF;
   };
-  
+
   public getStringsBytes() {
     const output = [];
 
@@ -56,7 +56,7 @@ export default class Bytecode {
       output.push((string.length >> 8) & 0xFF);
       output.push((string.length >> 16) & 0xFF);
       output.push((string.length >> 24) & 0xFF);
-    
+
       for(const char of string.split('')) {
         const xorCharCode = char.charCodeAt(0) ^ 0x80;
 

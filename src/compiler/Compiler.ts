@@ -101,30 +101,74 @@ export default class Compiler {
 
   public compileNode(node: Node) {
     this.debug("compiling " + node.type + " node");
-    
-    switch(node.type) {
-      case "StringLiteral": this.stringLiteralCompiler.compile(node); break;
-      case "NumericLiteral": this.numericLiteralCompiler.compile(node); break;
-      case "BooleanLiteral": this.booleanLiteralCompiler.compile(node); break;
-      case "NullLiteral": this.nullLiteralCompiler.compile(); break;
-      case "BinaryExpression": this.binaryExpressionCompiler.compile(node); break;
-      case "LogicalExpression": this.logicalExpressionCompiler.compile(node); break;
-      case "UnaryExpression": this.unaryExpressionCompiler.compile(node); break;
-      case "MemberExpression": this.memberExpressionCompiler.compile(node); break;
-      case "NewExpression": this.newExpressionCompiler.compile(node); break;
-      case "CallExpression": this.callExpressionCompiler.compile(node); break;
-      case "ArrayExpression": this.arrayExpressionCompiler.compile(node); break;
-      case "ObjectExpression": this.objectExpressionCompiler.compile(node); break;
-      case "AssignmentExpression": this.assignmentExpressionCompiler.compile(node); break;
-      case "FunctionExpression": this.functionExpressionCompiler.compile(node); break;
-      case "VariableDeclaration": this.variableDeclarationCompiler.compile(node); break;
-      case "VariableDeclarator": this.variableDeclaratorCompiler.compile(node); break;
-      case "ExpressionStatement": this.expressionStatementCompiler.compile(node); break;
-      case "Identifier": this.identifierCompiler.compile(node); break;
-      case "IfStatement": this.ifStatementCompiler.compile(node); break;
-      case "ReturnStatement": this.returnStatement.compile(node); break;
-      case "BlockStatement": this.blockStatementCompiler.compile(node); break;
-      case "DebuggerStatement": this.debuggerStatementCompiler.compile(); break;
+
+    switch (node.type) {
+      case "StringLiteral":
+        this.stringLiteralCompiler.compile(node);
+        break;
+      case "NumericLiteral":
+        this.numericLiteralCompiler.compile(node);
+        break;
+      case "BooleanLiteral":
+        this.booleanLiteralCompiler.compile(node);
+        break;
+      case "NullLiteral":
+        this.nullLiteralCompiler.compile();
+        break;
+      case "BinaryExpression":
+        this.binaryExpressionCompiler.compile(node);
+        break;
+      case "LogicalExpression":
+        this.logicalExpressionCompiler.compile(node);
+        break;
+      case "UnaryExpression":
+        this.unaryExpressionCompiler.compile(node);
+        break;
+      case "MemberExpression":
+        this.memberExpressionCompiler.compile(node);
+        break;
+      case "NewExpression":
+        this.newExpressionCompiler.compile(node);
+        break;
+      case "CallExpression":
+        this.callExpressionCompiler.compile(node);
+        break;
+      case "ArrayExpression":
+        this.arrayExpressionCompiler.compile(node);
+        break;
+      case "ObjectExpression":
+        this.objectExpressionCompiler.compile(node);
+        break;
+      case "AssignmentExpression":
+        this.assignmentExpressionCompiler.compile(node);
+        break;
+      case "FunctionExpression":
+        this.functionExpressionCompiler.compile(node);
+        break;
+      case "VariableDeclaration":
+        this.variableDeclarationCompiler.compile(node);
+        break;
+      case "VariableDeclarator":
+        this.variableDeclaratorCompiler.compile(node);
+        break;
+      case "ExpressionStatement":
+        this.expressionStatementCompiler.compile(node);
+        break;
+      case "Identifier":
+        this.identifierCompiler.compile(node);
+        break;
+      case "IfStatement":
+        this.ifStatementCompiler.compile(node);
+        break;
+      case "ReturnStatement":
+        this.returnStatement.compile(node);
+        break;
+      case "BlockStatement":
+        this.blockStatementCompiler.compile(node);
+        break;
+      case "DebuggerStatement":
+        this.debuggerStatementCompiler.compile();
+        break;
     };
   };
 
