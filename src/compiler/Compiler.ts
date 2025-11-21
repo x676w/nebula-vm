@@ -20,6 +20,7 @@ import ArrayExpressionCompiler from "./compilers/expressions/ArrayExpressionComp
 import ObjectExpressionCompiler from "./compilers/expressions/ObjectExpressionCompiler.js";
 import AssignmentExpressionCompiler from "./compilers/expressions/AssignmentExpressionCompiler.js";
 import FunctionExpressionCompiler from "./compilers/expressions/FunctionExpressionCompiler.js";
+import UpdateExpressionCompiler from "./compilers/expressions/UpdateExpressionCompiler.js";
 import VariableDeclarationCompiler from "./compilers/others/VariableDeclarationCompiler.js";
 import VariableDeclaratorCompiler from "./compilers/others/VariableDeclaratorCompiler.js";
 import ExpressionStatementCompiler from "./compilers/statements/ExpressionStatementCompiler.js";
@@ -47,6 +48,7 @@ export default class Compiler {
   private objectExpressionCompiler: ObjectExpressionCompiler;
   private assignmentExpressionCompiler: AssignmentExpressionCompiler;
   private functionExpressionCompiler: FunctionExpressionCompiler;
+  private updateExpressionCompiler: UpdateExpressionCompiler;
   private variableDeclarationCompiler: VariableDeclarationCompiler;
   private variableDeclaratorCompiler: VariableDeclaratorCompiler;
   private expressionStatementCompiler: ExpressionStatementCompiler;
@@ -77,6 +79,7 @@ export default class Compiler {
     this.objectExpressionCompiler = new ObjectExpressionCompiler(this);
     this.assignmentExpressionCompiler = new AssignmentExpressionCompiler(this);
     this.functionExpressionCompiler = new FunctionExpressionCompiler(this);
+    this.updateExpressionCompiler = new UpdateExpressionCompiler(this);
     this.variableDeclarationCompiler = new VariableDeclarationCompiler(this);
     this.variableDeclaratorCompiler = new VariableDeclaratorCompiler(this);
     this.expressionStatementCompiler = new ExpressionStatementCompiler(this);
@@ -144,6 +147,9 @@ export default class Compiler {
         break;
       case "FunctionExpression":
         this.functionExpressionCompiler.compile(node);
+        break;
+      case "UpdateExpression":
+        this.updateExpressionCompiler.compile(node);
         break;
       case "VariableDeclaration":
         this.variableDeclarationCompiler.compile(node);
