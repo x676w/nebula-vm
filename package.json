@@ -17,7 +17,7 @@
   "license": "MIT",
   "author": "x676w",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "main/server.js",
   "scripts": {
     "dev": "nodemon",
     "start": "tsc && node dev/server.js",
