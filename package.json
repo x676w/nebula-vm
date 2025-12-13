@@ -20,8 +20,8 @@
   "main": "main/server.js",
   "scripts": {
     "dev": "nodemon",
-    "start": "tsc && node dev/server.js",
-    "obfuscate": "tsc && node dev/obfuscate.js",
+    "start": "tsc && node main/server.js",
+    "obfuscate": "tsc && node main/obfuscate.js",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
