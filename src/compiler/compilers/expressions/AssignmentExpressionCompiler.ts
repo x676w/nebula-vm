@@ -26,7 +26,59 @@ export default class AssignmentExpressionCompiler extends NodeCompiler<Assignmen
 
       // Variable assignment compilation
       case "Identifier": {
-        // TODO
+        // Value compilation
+        this.compiler.compileNode(node.right);
+
+        const variableName = node.left.name;
+        const definition = this.compiler.scopeManager.getVariable(variableName);
+        const isOperation = node.operator !== "=";
+
+        this.compiler.bytecode.writeOperationCode(OperationCode.ASSIGN_VARIABLE);
+        this.compiler.bytecode.writeInstruction(isOperation ? 1 : 0);
+        this.compiler.bytecode.writeDword(definition.scope.id);
+        this.compiler.bytecode.writeDword(definition.destination);
+
+        if(isOperation) {
+          switch(node.operator) {
+            case "=": break;
+            case "+=":
+              this.compiler.bytecode.writeOperationCode(OperationCode.ADD_ASSIGN_VARIABLE);
+              break;
+            case "-=":
+              this.compiler.bytecode.writeOperationCode(OperationCode.SUB_ASSIGN_VARIABLE);
+              break;
+            case "*=":
+              this.compiler.bytecode.writeOperationCode(OperationCode.MUL_ASSIGN_VARIABLE);
+              break;
+            case "/=":
+              this.compiler.bytecode.writeOperationCode(OperationCode.DIV_ASSIGN_VARIABLE);
+              break;
+            case "%=":
+              this.compiler.bytecode.writeOperationCode(OperationCode.MOD_ASSIGN_VARIABLE);
+              break;
+            case "<<=":
+              this.compiler.bytecode.writeOperationCode(OperationCode.BIT_SHIFT_LEFT_ASSIGN_VARIABLE);
+              break;
+            case ">>=":
+              this.compiler.bytecode.writeOperationCode(OperationCode.BIT_SHIFT_RIGHT_ASSIGN_VAIRABLE);
+              break;
+            case ">>>=":
+              this.compiler.bytecode.writeOperationCode(OperationCode.UNSIGNED_BIT_SHIFT_RIGHT_ASSIGN_VARIABLE);
+              break;
+            case "^=":
+              this.compiler.bytecode.writeOperationCode(OperationCode.BIT_XOR_ASSIGN_VARIABLE);
+              break;
+            case "&=":
+              this.compiler.bytecode.writeOperationCode(OperationCode.BIT_AND_ASSIGN_VARIABLE);
+              break;
+            case "|=":
+              this.compiler.bytecode.writeOperationCode(OperationCode.BIT_OR_ASSIGN_VARIABLE);
+              break;
+            default:
+              throw new Error("Unsupported assignment operator: " + node.operator);
+          };
+        };
+        
         break;
       };
     };

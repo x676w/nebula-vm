@@ -10,10 +10,9 @@ export default class IdentifierCompiler extends NodeCompiler<Identifier> {
 
   public override compile(node: Identifier): void {
     const { name } = node;
-    const currentScope = this.compiler.scopeManager.getCurrentScope();
     
-    if(this.compiler.scopeManager.hasVariable(name, currentScope)) {
-      const definition = this.compiler.scopeManager.getVariable(name, currentScope);
+    if(this.compiler.scopeManager.hasVariable(name)) {
+      const definition = this.compiler.scopeManager.getVariable(name);
       this.compiler.bytecode.writeOperationCode(OperationCode.LOAD_VARIABLE);
       this.compiler.bytecode.writeDword(definition.scope.id);
       this.compiler.bytecode.writeDword(definition.destination);

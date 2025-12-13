@@ -27,6 +27,14 @@ export default class UnaryExpressionCompiler extends NodeCompiler<UnaryExpressio
       case "typeof":
         this.compiler.bytecode.writeOperationCode(OperationCode.UNARY_TYPEOF);
         break;
+      case "void":
+        this.compiler.bytecode.writeOperationCode(OperationCode.UNARY_VOID);
+        break;
+      case "throw":
+        this.compiler.bytecode.writeOperationCode(OperationCode.UNARY_THROW);
+        break;
+      default:
+        throw new Error("Unsupported unary operator: " + node.operator);
     };
   };
 };

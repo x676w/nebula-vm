@@ -13,9 +13,30 @@ export default class FunctionExpressionCompiler extends NodeCompiler<FunctionExp
 
     this.compiler.scopeManager.enterNewScope();
 
+    const currentScope = this.compiler.scopeManager.getCurrentScope();
+    
+    for(let i = 0; i < node.params.length; i++) {
+      const param = node.params[i]!;
+
+      if(param.type !== 'Identifier') continue;
+
+      const definition = this.compiler.scopeManager.defineVariable(
+        param.name, currentScope
+      );
+
+      this.compiler.bytecode.writeOperationCode(OperationCode.LOAD_ARGUMENT);
+      this.compiler.bytecode.writeDword(i);
+      
+      this.compiler.bytecode.writeOperationCode(OperationCode.STORE_VARIABLE);
+      this.compiler.bytecode.writeDword(definition.scope.id);
+      this.compiler.bytecode.writeDword(definition.destination);
+    };
+
     for(const statement of node.body.body) {
       this.compiler.compileNode(statement);
     };
+
+    this.compiler.scopeManager.exitScope();
 
     const fnProgram = this.compiler.bytecode.replaceProgram(oldProgram);
 
@@ -26,7 +47,5 @@ export default class FunctionExpressionCompiler extends NodeCompiler<FunctionExp
       const fnInstruction = fnProgram[i]!;
       this.compiler.bytecode.writeInstruction(fnInstruction);
     };
-
-    this.compiler.scopeManager.exitScope();
   };
 };

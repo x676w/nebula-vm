@@ -9,30 +9,31 @@ export default class IfStatementCompiler extends NodeCompiler<IfStatement> {
   };
 
   public override compile(node: IfStatement): void {
-    this.compiler.compileNode(node.test);
+    const { test, consequent, alternate } = node;
+    
+    this.compiler.compileNode(test);
+    
+    const elseLabel = this.compiler.bytecode.createLabel("if_else");
+    const endLabel = this.compiler.bytecode.createLabel("if_end");
+    
     this.compiler.bytecode.writeOperationCode(OperationCode.JUMP_IF_FALSE);
+    this.compiler.bytecode.writeLabelReference(elseLabel);
     
-    const addrPos = this.compiler.bytecode.program.length;
-    this.compiler.bytecode.writeDword(0);
-
-    this.compiler.compileNode(node.consequent);
-
-    let jumpOverElsePos = null;
-    if(node.alternate) {
+    this.compiler.compileNode(consequent);
+    
+    if(alternate) {
       this.compiler.bytecode.writeOperationCode(OperationCode.JUMP);
-      jumpOverElsePos = this.compiler.bytecode.program.length;
-      this.compiler.bytecode.writeDword(0);
-    };
-
-    const elsePos = this.compiler.bytecode.program.length;
-    if(node.alternate) {
-      this.compiler.compileNode(node.alternate);
+      this.compiler.bytecode.writeLabelReference(endLabel);
     };
     
-    const endPos = this.compiler.bytecode.program.length;
-    this.compiler.bytecode.writeDwordAt(addrPos, elsePos);
-    if(jumpOverElsePos !== null) {
-      this.compiler.bytecode.writeDwordAt(jumpOverElsePos, endPos);
+    this.compiler.bytecode.markLabel(elseLabel);
+    
+    if(alternate) {
+      this.compiler.compileNode(alternate);
+      this.compiler.bytecode.markLabel(endLabel);
+    } else {
+      this.compiler.bytecode.markLabel(elseLabel);
+      this.compiler.bytecode.markLabel(endLabel);
     };
   };
 };

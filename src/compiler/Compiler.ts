@@ -1,3 +1,5 @@
+import { getRandomInteger } from "../utils/Random.js";
+import { OperationCode } from "./bytecode/OperationCode.js";
 import { stringLiteral, type Node, type Program } from "@babel/types";
 import parseCode from "../utils/Parse.js";
 import Bytecode from "./bytecode/Bytecode.js";
@@ -23,12 +25,16 @@ import FunctionExpressionCompiler from "./compilers/expressions/FunctionExpressi
 import UpdateExpressionCompiler from "./compilers/expressions/UpdateExpressionCompiler.js";
 import VariableDeclarationCompiler from "./compilers/others/VariableDeclarationCompiler.js";
 import VariableDeclaratorCompiler from "./compilers/others/VariableDeclaratorCompiler.js";
+import FunctionDeclarationCompiler from "./compilers/others/FunctionDeclarationCompiler.js";
 import ExpressionStatementCompiler from "./compilers/statements/ExpressionStatementCompiler.js";
+import ForStatementCompiler from "./compilers/statements/ForStatementCompiler.js";
 import IdentifierCompiler from "./compilers/others/IdentifierCompiler.js";
 import IfStatementCompiler from "./compilers/statements/IfStatementCompiler.js";
-import BlockStatementCompiler from "./compilers/statements/BlockStatementCompiler.js";
-import DebuggerStatementCompiler from "./compilers/statements/DebuggerStatementCompiler.js";
 import ReturnStatementCompiler from "./compilers/statements/ReturnStatementCompiler.js";
+import ThrowStatementCompiler from "./compilers/statements/ThrowStatementCompiler.js";
+import BlockStatementCompiler from "./compilers/statements/BlockStatementCompiler.js";
+import WhileStatementCompiler from "./compilers/statements/WhileStatementCompiler.js";
+import DebuggerStatementCompiler from "./compilers/statements/DebuggerStatementCompiler.js";
 
 /**
  * Main compiler
@@ -51,11 +57,15 @@ export default class Compiler {
   private updateExpressionCompiler: UpdateExpressionCompiler;
   private variableDeclarationCompiler: VariableDeclarationCompiler;
   private variableDeclaratorCompiler: VariableDeclaratorCompiler;
+  private functionDeclarationCompiler: FunctionDeclarationCompiler;
   private expressionStatementCompiler: ExpressionStatementCompiler;
+  private forStatementCompiler: ForStatementCompiler;
   private identifierCompiler: IdentifierCompiler;
   private ifStatementCompiler: IfStatementCompiler;
-  private returnStatement: ReturnStatementCompiler;
+  private returnStatementCompiler: ReturnStatementCompiler;
+  private throwStatementCompiler: ThrowStatementCompiler;
   private blockStatementCompiler: BlockStatementCompiler;
+  private whileStatementCompiler: WhileStatementCompiler;
   private debuggerStatementCompiler: DebuggerStatementCompiler;
 
   public bytecode: Bytecode;
@@ -82,11 +92,15 @@ export default class Compiler {
     this.updateExpressionCompiler = new UpdateExpressionCompiler(this);
     this.variableDeclarationCompiler = new VariableDeclarationCompiler(this);
     this.variableDeclaratorCompiler = new VariableDeclaratorCompiler(this);
+    this.functionDeclarationCompiler = new FunctionDeclarationCompiler(this);
     this.expressionStatementCompiler = new ExpressionStatementCompiler(this);
+    this.forStatementCompiler = new ForStatementCompiler(this);
     this.identifierCompiler = new IdentifierCompiler(this);
     this.ifStatementCompiler = new IfStatementCompiler(this);
-    this.returnStatement = new ReturnStatementCompiler(this);
+    this.returnStatementCompiler = new ReturnStatementCompiler(this);
+    this.throwStatementCompiler = new ThrowStatementCompiler(this);
     this.blockStatementCompiler = new BlockStatementCompiler(this);
+    this.whileStatementCompiler  = new WhileStatementCompiler(this);
     this.debuggerStatementCompiler = new DebuggerStatementCompiler(this);
 
     this.bytecode = new Bytecode();
@@ -94,6 +108,31 @@ export default class Compiler {
     this.astTree = parseCode(sourceCode);
     this.sourceCode = sourceCode;
     this.verbose = verbose ?? false;
+  };
+  
+  private randomiseOpcodes() {
+    const isNumRegex = /^[0-9]+$/;
+    const opCodeValues: number[] = [];
+    const keyValues: string[] = [];
+    
+    for(const key in OperationCode) {
+      if(!isNumRegex.test(key)) {
+        opCodeValues.push(OperationCode[key as keyof typeof OperationCode]);
+        keyValues.push(key);
+      };
+    };
+
+    while(opCodeValues.length) {
+      const idx = getRandomInteger(0, opCodeValues.length - 1);
+      const opCode = opCodeValues[idx];
+      opCodeValues.splice(idx, 1);
+      const key = keyValues.pop();
+
+      // @ts-ignore
+      OperationCode[key] = opCode;
+      // @ts-ignore
+      OperationCode[opCode] = key;
+    };
   };
 
   private debug(message: string) {
@@ -157,8 +196,14 @@ export default class Compiler {
       case "VariableDeclarator":
         this.variableDeclaratorCompiler.compile(node);
         break;
+      case "FunctionDeclaration":
+        this.functionDeclarationCompiler.compile(node);
+        break;
       case "ExpressionStatement":
         this.expressionStatementCompiler.compile(node);
+        break;
+      case "ForStatement":
+        this.forStatementCompiler.compile(node);
         break;
       case "Identifier":
         this.identifierCompiler.compile(node);
@@ -167,14 +212,23 @@ export default class Compiler {
         this.ifStatementCompiler.compile(node);
         break;
       case "ReturnStatement":
-        this.returnStatement.compile(node);
+        this.returnStatementCompiler.compile(node);
+        break;
+      case "ThrowStatement":
+        this.throwStatementCompiler.compile(node);
         break;
       case "BlockStatement":
         this.blockStatementCompiler.compile(node);
         break;
+      case "WhileStatement":
+        this.whileStatementCompiler.compile(node);
+        break;
       case "DebuggerStatement":
         this.debuggerStatementCompiler.compile();
         break;
+      case "EmptyStatement": break;
+      // default:
+      //   throw new Error("Unsupported node type: " + node.type);
     };
   };
 
@@ -186,15 +240,21 @@ export default class Compiler {
     let elapsedTime = performance.now();
     this.debug("starting compilation, source code size: " + this.sourceCode.length);
     
+    if(!this.verbose) this.randomiseOpcodes();
     this.bytecode.writeInstruction(compress ? 1 : 0);
 
     for(const node of this.astTree.body) {
       this.compileNode(node);
     };
 
+    this.bytecode.resolveLabels();
+
     elapsedTime = performance.now() - elapsedTime;
     this.debug("compiled in " + (elapsedTime / 1e3).toFixed(2) + "s");
 
-    return this.bytecode;
+    return {
+      bytecode : this.bytecode,
+      opcodes  : OperationCode
+    };
   };
 };

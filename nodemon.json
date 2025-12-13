@@ -2,5 +2,5 @@
   "watch": ["src/**/*.ts", "dev/**/*.js", "resources/input.js"],
   "ext": "js,ts",
   "ignore": ["node_modules/", "dist/"],
-  "exec": "npm run dev:start"
+  "exec": "tsc && node dev/obfuscate.js"
 }

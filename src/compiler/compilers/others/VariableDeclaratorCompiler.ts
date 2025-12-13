@@ -12,14 +12,13 @@ export default class VariableDeclaratorCompiler extends NodeCompiler<VariableDec
     if(node.id.type !== 'Identifier') return;
 
     const variableName = node.id.name;
+    const definition = this.compiler.scopeManager.defineVariable(variableName);
 
     if(node.init) {
       this.compiler.compileNode(node.init)!;
     } else {
       this.compiler.bytecode.writeOperationCode(OperationCode.STACK_PUSH_UNDEFINED);
     };
-    
-    const definition = this.compiler.scopeManager.defineVariable(variableName);
 
     this.compiler.bytecode.writeOperationCode(OperationCode.STORE_VARIABLE);
     this.compiler.bytecode.writeDword(definition.scope.id);

@@ -1,10 +1,8 @@
-import type Bytecode from "./compiler/bytecode/Bytecode.js";
 import Compiler from "./compiler/Compiler.js";
 
-const compile = (input: string, verbose?: boolean): Bytecode => {
+const compile = (input: string, verbose?: boolean) => {
   const compiler = new Compiler(input, verbose);
-  const bytecode = compiler.compile();
-  return bytecode;
+  return compiler.compile();
 };
 
 export default compile;

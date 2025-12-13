@@ -9,7 +9,7 @@ export default class ObjectExpressionCompiler extends NodeCompiler<ObjectExpress
   };
   
   public override compile(node: ObjectExpression): void {
-    const {properties} = node;
+    const { properties } = node;
     
     for(const property of properties) {
       switch(property.type) {
