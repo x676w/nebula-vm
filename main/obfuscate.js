@@ -14,7 +14,7 @@ const _generate = typeof generate === "object" ? generate.default : generate;
 
 const inputPath = path.resolve(path.join("./", "resources", "input.js"));
 const outputPath = path.resolve(path.join("./", "resources", "output.js"));
-const interpreterPath = path.resolve(path.join("./", "dev", "interpreter.js"));
+const interpreterPath = path.resolve(path.join("./", "main", "interpreter.js"));
 
 let start;
 let input;
