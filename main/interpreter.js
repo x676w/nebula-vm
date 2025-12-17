@@ -477,11 +477,7 @@
       const operationCode = readInstruction();
   
       if(operationCode === __RETURN__) {
-        let value;
-        if(readInstruction()) {
-          value = stackPop();
-        };
-        return value;
+        return readInstruction() ? stackPop() : undefined;
       };
 
       const handler = Handlers[operationCode];
