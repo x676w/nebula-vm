@@ -8,11 +8,11 @@
     Arguments: null,
     Scopes: null,
     Strings: null,
+    Global: null,
+    This: null,
   };
   
-  const Pointer = {
-    Bytecode: null,
-  };
+  let Pointer = 0;
 
   const Handlers = {
     __STACK_PUSH_STRING__: function() {
@@ -35,6 +35,9 @@
     },
     __STACK_PUSH_DUPLICATE__: function() {
       stackPush(stackPeek());
+    },
+    __LOAD_THIS__: function() {
+      stackPush(Context.This);
     },
     __STACK_POP__: function() {
       stackPop();
@@ -135,6 +138,16 @@
       const right = stackPop();
       stackPush(left | right);
     },
+    __BINARY_IN__: function() {
+      const left = stackPop();
+      const right = stackPop();
+      stackPush(left in right);
+    },
+    __BINARY_INSTANCEOF__: function() {
+      const left = stackPop();
+      const right = stackPop();
+      stackPush(left instanceof right);
+    },
     __UNARY_PLUS__: function() {
       const arg = stackPop();
       stackPush(+arg);
@@ -193,15 +206,13 @@
       const prop = stackPop();
       const obj = stackPop();
       const isPrefix = readInstruction() === 1;
-      const result = isPrefix ? ++obj[prop] : obj[prop]++;
-      stackPush(result);
+      stackPush(isPrefix ? ++obj[prop] : obj[prop]++);
     },
     __COMPLEX_PROP_UPDATE_MINUS__: function() {
       const prop = stackPop();
       const obj = stackPop();
       const isPrefix = readInstruction() === 1;
-      const result = isPrefix ? --obj[prop] : obj[prop]--;
-      stackPush(result);
+      stackPush(isPrefix ? --obj[prop] : obj[prop]--);
     },
     __LOAD_VARIABLE__: function() {
       const scopeId = readDword();
@@ -268,10 +279,9 @@
     },
     __LOAD_GLOBAL__: function() {
       const name = stackPop();
-      const globalObj = globalThis;
       
       try {
-        const value = Reflect.get(globalObj, name);
+        const value = Reflect.get(Context.Global, name);
         stackPush(value);
       } catch (error) {
         stackPush(undefined);
@@ -351,24 +361,27 @@
       stackPush(function() {
         let result;
         const args = arguments;
-        
+
         const oldBytecode = Context.Bytecode;
         const oldStack = Context.Stack;
         const oldArguments = Context.Arguments;
-        const oldBytecodePointer = Pointer.Bytecode;
+        const oldThis = Context.This;
+        const oldBytecodePointer = Pointer;
 
         try {
           Context.Bytecode = u8.constructor.from(fnBody);
           Context.Stack = [];
           Context.Arguments = [...args];
-          Pointer.Bytecode = 0;
+          Context.This = this;
+          Pointer = 0;
 
           result = runVM();
         } finally {
           Context.Bytecode = oldBytecode;
           Context.Stack = oldStack;
           Context.Arguments = oldArguments;
-          Pointer.Bytecode = oldBytecodePointer;
+          Context.This = oldThis;
+          Pointer = oldBytecodePointer;
         };
 
         return result;
@@ -376,20 +389,20 @@
     },
     __JUMP__: function() {
       const addr = readDword();
-      Pointer.Bytecode = addr;
+      Pointer = addr;
     },
     __JUMP_IF_TRUE__: function() {
       const addr = readDword();
       const value = stackPop();
       if(value) {
-        Pointer.Bytecode = addr;
+        Pointer = addr;
       };
     },
     __JUMP_IF_FALSE__: function() {
       const addr = readDword();
       const value = stackPop();
       if(!value) {
-        Pointer.Bytecode = addr;
+        Pointer = addr;
       };
     },
     __DEBUGGER__: function() {
@@ -398,14 +411,14 @@
   };
   
   function readInstruction() {
-    return Context.Bytecode[Pointer.Bytecode++];
+    return Context.Bytecode[Pointer++];
   };
   
   function readDword() {
-    return Context.Bytecode[Pointer.Bytecode++]
-      | Context.Bytecode[Pointer.Bytecode++] << 8
-      | Context.Bytecode[Pointer.Bytecode++] << 16
-      | Context.Bytecode[Pointer.Bytecode++] << 24;
+    return Context.Bytecode[Pointer++]
+      | Context.Bytecode[Pointer++] << 8
+      | Context.Bytecode[Pointer++] << 16
+      | Context.Bytecode[Pointer++] << 24;
   };
 
   function readDouble() {
@@ -473,7 +486,7 @@
   };
   
   function runVM() {
-    while(Pointer.Bytecode < Context.Bytecode.length) {
+    while(Pointer < Context.Bytecode.length) {
       const operationCode = readInstruction();
   
       if(operationCode === __RETURN__) {
@@ -504,8 +517,10 @@
     Context.Arguments = [];
     Context.Scopes = [{}];
     Context.Strings = [];
+    Context.This = null;
+    Context.Global = typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : new Function('return this')();
 
-    Pointer.Bytecode = 0;
+    Pointer = 0;
 
     if(stringsBytes.length) {
       for(let i = 0; i < stringsBytes.length;) {
