@@ -24,6 +24,8 @@ export default class ForStatementCompiler extends NodeCompiler<ForStatement> {
     const bodyLabel = this.compiler.bytecode.createLabel("for_body");
     const updateLabel = this.compiler.bytecode.createLabel("for_update");
     const endLabel = this.compiler.bytecode.createLabel("for_end");
+
+    this.compiler.pushLoop(endLabel, updateLabel);
     
     this.compiler.bytecode.writeOperationCode(OperationCode.JUMP);
     this.compiler.bytecode.writeLabelReference(testLabel);
@@ -46,14 +48,15 @@ export default class ForStatementCompiler extends NodeCompiler<ForStatement> {
       
       this.compiler.bytecode.writeOperationCode(OperationCode.JUMP_IF_TRUE);
       this.compiler.bytecode.writeLabelReference(bodyLabel);
-      
     } else {
       this.compiler.bytecode.writeOperationCode(OperationCode.JUMP);
       this.compiler.bytecode.writeLabelReference(bodyLabel);
     };
     
     this.compiler.bytecode.markLabel(endLabel);
-    
+
+    this.compiler.popLoop();
+
     this.compiler.scopeManager.exitScope();
   };
 };

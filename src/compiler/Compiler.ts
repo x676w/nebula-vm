@@ -23,6 +23,7 @@ import ObjectExpressionCompiler from "./compilers/expressions/ObjectExpressionCo
 import AssignmentExpressionCompiler from "./compilers/expressions/AssignmentExpressionCompiler.js";
 import FunctionExpressionCompiler from "./compilers/expressions/FunctionExpressionCompiler.js";
 import UpdateExpressionCompiler from "./compilers/expressions/UpdateExpressionCompiler.js";
+import ThisExpressionCompiler from "./compilers/expressions/ThisExpressionCompiler.js";
 import VariableDeclarationCompiler from "./compilers/others/VariableDeclarationCompiler.js";
 import VariableDeclaratorCompiler from "./compilers/others/VariableDeclaratorCompiler.js";
 import FunctionDeclarationCompiler from "./compilers/others/FunctionDeclarationCompiler.js";
@@ -31,10 +32,13 @@ import ForStatementCompiler from "./compilers/statements/ForStatementCompiler.js
 import IdentifierCompiler from "./compilers/others/IdentifierCompiler.js";
 import IfStatementCompiler from "./compilers/statements/IfStatementCompiler.js";
 import ReturnStatementCompiler from "./compilers/statements/ReturnStatementCompiler.js";
+import SwitchStatementCompiler from "./compilers/statements/SwitchStatementCompiler.js";
 import ThrowStatementCompiler from "./compilers/statements/ThrowStatementCompiler.js";
 import BlockStatementCompiler from "./compilers/statements/BlockStatementCompiler.js";
 import WhileStatementCompiler from "./compilers/statements/WhileStatementCompiler.js";
 import DebuggerStatementCompiler from "./compilers/statements/DebuggerStatementCompiler.js";
+import BreakStatementCompiler from "./compilers/statements/BreakStatementCompiler.js";
+import ContinueStatementCompiler from "./compilers/statements/ContinueStatementCompiler.js";
 
 /**
  * Main compiler
@@ -55,6 +59,7 @@ export default class Compiler {
   private assignmentExpressionCompiler: AssignmentExpressionCompiler;
   private functionExpressionCompiler: FunctionExpressionCompiler;
   private updateExpressionCompiler: UpdateExpressionCompiler;
+  private thisExpressionCompiler: ThisExpressionCompiler;
   private variableDeclarationCompiler: VariableDeclarationCompiler;
   private variableDeclaratorCompiler: VariableDeclaratorCompiler;
   private functionDeclarationCompiler: FunctionDeclarationCompiler;
@@ -63,10 +68,14 @@ export default class Compiler {
   private identifierCompiler: IdentifierCompiler;
   private ifStatementCompiler: IfStatementCompiler;
   private returnStatementCompiler: ReturnStatementCompiler;
+  private switchStatementCompiler: SwitchStatementCompiler;
   private throwStatementCompiler: ThrowStatementCompiler;
   private blockStatementCompiler: BlockStatementCompiler;
   private whileStatementCompiler: WhileStatementCompiler;
   private debuggerStatementCompiler: DebuggerStatementCompiler;
+  private breakStatementCompiler: BreakStatementCompiler;
+  private continueStatementCompiler: ContinueStatementCompiler;
+  private loopStack: Array<{ breakLabel: string; continueLabel: string }>;
 
   public bytecode: Bytecode;
   public scopeManager: ScopeManager;
@@ -90,6 +99,7 @@ export default class Compiler {
     this.assignmentExpressionCompiler = new AssignmentExpressionCompiler(this);
     this.functionExpressionCompiler = new FunctionExpressionCompiler(this);
     this.updateExpressionCompiler = new UpdateExpressionCompiler(this);
+    this.thisExpressionCompiler = new ThisExpressionCompiler(this);
     this.variableDeclarationCompiler = new VariableDeclarationCompiler(this);
     this.variableDeclaratorCompiler = new VariableDeclaratorCompiler(this);
     this.functionDeclarationCompiler = new FunctionDeclarationCompiler(this);
@@ -98,10 +108,14 @@ export default class Compiler {
     this.identifierCompiler = new IdentifierCompiler(this);
     this.ifStatementCompiler = new IfStatementCompiler(this);
     this.returnStatementCompiler = new ReturnStatementCompiler(this);
+    this.switchStatementCompiler = new SwitchStatementCompiler(this);
     this.throwStatementCompiler = new ThrowStatementCompiler(this);
     this.blockStatementCompiler = new BlockStatementCompiler(this);
     this.whileStatementCompiler  = new WhileStatementCompiler(this);
     this.debuggerStatementCompiler = new DebuggerStatementCompiler(this);
+    this.breakStatementCompiler = new BreakStatementCompiler(this);
+    this.continueStatementCompiler = new ContinueStatementCompiler(this);
+    this.loopStack = [];
 
     this.bytecode = new Bytecode();
     this.scopeManager = new ScopeManager();
@@ -141,7 +155,20 @@ export default class Compiler {
     };
   };
 
+  public pushLoop(breakLabel: string, continueLabel: string) {
+    this.loopStack.push({ breakLabel, continueLabel });
+  };
+
+  public popLoop() {
+    return this.loopStack.pop();
+  };
+
+  public getCurrentLoop() {
+    return this.loopStack[this.loopStack.length - 1];
+  };
+
   public compileNode(node: Node) {
+    if(!node) return;
     this.debug("compiling " + node.type + " node");
 
     switch (node.type) {
@@ -190,6 +217,9 @@ export default class Compiler {
       case "UpdateExpression":
         this.updateExpressionCompiler.compile(node);
         break;
+      case "ThisExpression":
+        this.thisExpressionCompiler.compile(node);
+        break;
       case "VariableDeclaration":
         this.variableDeclarationCompiler.compile(node);
         break;
@@ -204,6 +234,15 @@ export default class Compiler {
         break;
       case "ForStatement":
         this.forStatementCompiler.compile(node);
+        break;
+      case "SwitchStatement":
+        this.switchStatementCompiler.compile(node);
+        break;
+      case "BreakStatement":
+        this.breakStatementCompiler.compile(node);
+        break;
+      case "ContinueStatement":
+        this.continueStatementCompiler.compile(node);
         break;
       case "Identifier":
         this.identifierCompiler.compile(node);

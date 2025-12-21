@@ -70,6 +70,12 @@ export default class BinaryExpressionCompiler extends NodeCompiler<BinaryExpress
       case "|":
         this.compiler.bytecode.writeOperationCode(OperationCode.BINARY_BIT_OR);
         break;
+      case "in":
+        this.compiler.bytecode.writeOperationCode(OperationCode.BINARY_IN);
+        break;
+      case "instanceof":
+        this.compiler.bytecode.writeOperationCode(OperationCode.BINARY_INSTANCEOF);
+        break;
     };
   };
 };

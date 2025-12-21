@@ -13,6 +13,8 @@ export default class WhileStatementCompiler extends NodeCompiler<WhileStatement>
     
     const loopStart = this.compiler.bytecode.createLabel("while_start");
     const loopEnd = this.compiler.bytecode.createLabel("while_end");
+
+    this.compiler.pushLoop(loopEnd, loopStart);
     
     this.compiler.bytecode.markLabel(loopStart);
     
@@ -20,12 +22,14 @@ export default class WhileStatementCompiler extends NodeCompiler<WhileStatement>
     
     this.compiler.bytecode.writeOperationCode(OperationCode.JUMP_IF_FALSE);
     this.compiler.bytecode.writeLabelReference(loopEnd);
-    
+
     this.compiler.compileNode(body);
     
     this.compiler.bytecode.writeOperationCode(OperationCode.JUMP);
     this.compiler.bytecode.writeLabelReference(loopStart);
     
     this.compiler.bytecode.markLabel(loopEnd);
+
+    this.compiler.popLoop();
   };
 };

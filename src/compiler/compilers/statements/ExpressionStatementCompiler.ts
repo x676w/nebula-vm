@@ -8,6 +8,6 @@ export default class ExpressionStatementCompiler extends NodeCompiler<Expression
   };
 
   public override compile(node: ExpressionStatement): void {
-    return this.compiler.compileNode(node.expression);
+    this.compiler.compileNode(node.expression);
   };
 };

@@ -37,6 +37,11 @@ export const obfuscate = (input) => {
     }
   }).outputText;
 
+  // Output transpiled to ES5 code
+  if(verbose) {
+    console.log(obfuscatedCode);
+  };
+
   try {
     const { bytecode, opcodes } = compile(obfuscatedCode, verbose);
   
