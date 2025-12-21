@@ -29,6 +29,8 @@ export enum OperationCode {
   BINARY_BIT_XOR,
   BINARY_BIT_AND, 
   BINARY_BIT_OR,
+  BINARY_IN,
+  BINARY_INSTANCEOF,
 
   UNARY_PLUS,
   UNARY_MINUS,
@@ -62,6 +64,7 @@ export enum OperationCode {
   BIT_OR_ASSIGN_VARIABLE,
 
   LOAD_GLOBAL,
+  LOAD_THIS,
   LOAD_ARGUMENT,
 
   CALL_FUNCTION,
