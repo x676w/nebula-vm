@@ -1,4 +1,4 @@
-import type { UpdateExpression } from "@babel/types";
+import type { Identifier, UpdateExpression } from "@babel/types";
 import NodeCompiler from "../NodeCompiler.js";
 import type Compiler from "../../Compiler.js";
 import { OperationCode } from "../../bytecode/OperationCode.js";
@@ -28,12 +28,10 @@ export default class UpdateExpressionCompiler extends NodeCompiler<UpdateExpress
 
         this.compiler.compileNode(object);
 
-        if(computed) {
+        if(computed && property.type !== "Identifier") {
           this.compiler.compileNode(property);
-        } else if(property.type === "Identifier") {
-          this.compiler.compileAsStringLiteral(property.name);
         } else {
-          this.compiler.compileNode(property);
+          this.compiler.compileAsStringLiteral((property as Identifier).name);
         };
 
         if(object.type === "Identifier" && this.compiler.scopeManager.hasVariable(object.name)) {
