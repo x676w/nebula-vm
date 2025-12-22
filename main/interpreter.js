@@ -278,6 +278,9 @@
       };
     },
     __LOAD_GLOBAL__: function() {
+      stackPush(Context.Global);
+    },
+    __LOAD_GLOBAL_PROP__: function() {
       const name = stackPop();
       
       try {
@@ -291,6 +294,9 @@
       const index = readDword();
       const arg = Context.Arguments[index];
       stackPush(arg);
+    },
+    __LOAD_ARGUMENTS__: function() {
+      stackPush(Context.Arguments);
     },
     __CALL_FUNCTION__: function() {
       const fn = stackPop();

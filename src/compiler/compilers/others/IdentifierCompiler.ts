@@ -11,6 +11,16 @@ export default class IdentifierCompiler extends NodeCompiler<Identifier> {
   public override compile(node: Identifier): void {
     const { name } = node;
     
+    if(node.name === "arguments") {
+      this.compiler.bytecode.writeOperationCode(OperationCode.LOAD_ARGUMENTS);
+      return;
+    };
+
+    if(node.name === "window") {
+      this.compiler.bytecode.writeOperationCode(OperationCode.LOAD_GLOBAL);
+      return;
+    };
+
     if(this.compiler.scopeManager.hasVariable(name)) {
       const definition = this.compiler.scopeManager.getVariable(name);
       this.compiler.bytecode.writeOperationCode(OperationCode.LOAD_VARIABLE);
@@ -18,7 +28,7 @@ export default class IdentifierCompiler extends NodeCompiler<Identifier> {
       this.compiler.bytecode.writeDword(definition.destination);
     } else {
       this.compiler.compileAsStringLiteral(name);
-      this.compiler.bytecode.writeOperationCode(OperationCode.LOAD_GLOBAL);
+      this.compiler.bytecode.writeOperationCode(OperationCode.LOAD_GLOBAL_PROP);
     };
   };
 };
